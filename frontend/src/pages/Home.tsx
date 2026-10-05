@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
   ArrowRight,
+  ArrowUpRight,
   BadgeCheck,
   CalendarCheck,
   CalendarDays,
@@ -9,6 +10,7 @@ import {
   HeartHandshake,
   MapPin,
   MessageCircle,
+  Navigation,
   Phone,
   Sparkles,
   Stethoscope,
@@ -17,9 +19,9 @@ import { ButtonLink } from '@/components/common/Button';
 import { Container, Section, SectionHeading } from '@/components/common/Layout';
 import { ServiceGrid } from '@/components/services/ServiceCard';
 import { ConsultationBanner } from '@/components/contact/ConsultationBanner';
-import { ClinicInfoStrip, MapLink } from '@/components/contact/ContactActions';
+import { ClinicInfoStrip } from '@/components/contact/ContactActions';
 import { GalleryGrid, GalleryLightbox } from '@/components/gallery/GalleryGrid';
-import { SmartImage, PortraitSlot } from '@/components/common/SmartImage';
+import { PortraitSlot } from '@/components/common/SmartImage';
 import {
   SkeletonGalleryGrid,
   SkeletonRegion,
@@ -30,7 +32,9 @@ import { useSettings } from '@/context/SettingsContext';
 import { useFeaturedServices } from '@/hooks/useServices';
 import { useGallery } from '@/hooks/useGallery';
 import { routes } from '@/routes/paths';
-import { buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
+import { buildMapHref, buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
+import { trackCtaClick } from '@/utils/analytics';
+import { cn } from '@/utils/cn';
 import {
   CLINIC_CONTACT,
   CLINIC_HOURS_DISPLAY,
@@ -93,6 +97,11 @@ const WHY_POINTS = [
       'Reach the clinic directly by phone or WhatsApp instead of waiting for a reply.',
   },
 ];
+
+// The first two reasons sit in the left column with the clinic facts, so the
+// two columns carry a similar number of cards and neither side ends short.
+const WHY_POINTS_LEFT = WHY_POINTS.slice(0, 2);
+const WHY_POINTS_RIGHT = WHY_POINTS.slice(2);
 
 export default function HomePage() {
   const { settings } = useSettings();
@@ -449,74 +458,133 @@ export default function HomePage() {
       {/* ------------------------------- 4. Why choose us */}
       <Section tone="white" padding="lg" labelledBy="why-title">
         <Container>
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
-            <div className="lg:col-span-5">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-pink-600">
-                Why Specialist Clinic
-              </p>
-              <h2
-                id="why-title"
-                className="mt-3 text-[1.75rem] leading-tight text-navy-800 sm:text-[2.125rem]"
-              >
-                Care That Puts You First
-              </h2>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-ink-soft">
-                We keep the process straightforward: specialist consultations, clear guidance and
-                direct ways to reach the clinic.
-              </p>
+          <SectionHeading
+            align="left"
+            eyebrow="Why Specialist Clinic"
+            title="Care That Puts You First"
+            description="We keep the process straightforward: specialist consultations, clear guidance and direct ways to reach the clinic."
+            id="why-title"
+          />
 
-              <div className="mt-7 rounded-2xl border border-line bg-app p-5">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-                  <p className="text-sm font-semibold text-navy-800">
-                    Evening clinic: {settings.clinicHours}
+          {/* Five reason cards plus two fact cards = seven items, split 4 / 3
+              across the two columns so both sides end at the same height with
+              no leftover gap. Each column is an equal-rows grid, and the last
+              card on the right spans both columns to close the row cleanly. */}
+          <div className="mt-10 grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2">
+            <ul className="grid auto-rows-fr gap-5">
+              <li className="group flex items-center gap-4 rounded-2xl border border-line bg-gradient-to-b from-blue-50 via-white to-white p-5 shadow-sm lg:p-6">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-navy-800 text-white shadow-sm transition-colors duration-200 group-hover:bg-navy-900">
+                  <Clock className="h-5.5 w-5.5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blue-700">
+                    Evening clinic
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-navy-800">
+                    {settings.clinicHours}
                   </p>
                 </div>
-                <div className="mt-3 flex items-center gap-3">
-                  <MapPin className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-                  <p className="text-sm font-semibold text-navy-800">
+              </li>
+
+              <li className="group flex items-center gap-4 rounded-2xl border border-line bg-gradient-to-b from-pink-50 via-white to-white p-5 shadow-sm lg:p-6">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-navy-800 text-white shadow-sm transition-colors duration-200 group-hover:bg-navy-900">
+                  <MapPin className="h-5.5 w-5.5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-pink-700">
+                    Location
+                  </p>
+                  <p className="mt-1 text-lg font-semibold text-navy-800 text-balance">
                     {settings.addressLandmark}, Morgah
                   </p>
                 </div>
-              </div>
-            </div>
+              </li>
 
-            <ul className="grid gap-4 sm:grid-cols-2 lg:col-span-7">
-              {WHY_POINTS.map((point) => (
+              {WHY_POINTS_LEFT.map((point) => (
                 <li
                   key={point.title}
-                  className="flex gap-4 rounded-2xl border border-line bg-white p-5 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                  className="group flex items-start gap-4 rounded-2xl border border-line bg-white p-5 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
                 >
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    <point.icon className="h-5 w-5" aria-hidden="true" />
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 transition-colors duration-200 group-hover:bg-navy-800 group-hover:text-white">
+                    <point.icon className="h-5.5 w-5.5" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">
-                    <h3 className="text-[0.9375rem] font-semibold text-navy-800">{point.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                    <h3 className="text-[0.9375rem] font-semibold text-navy-800 text-balance">
+                      {point.title}
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-ink-soft text-pretty">
                       {point.description}
                     </p>
                   </div>
                 </li>
               ))}
-
-              <li className="rounded-2xl border border-navy-700 bg-navy-800 p-5 text-white shadow-md sm:col-span-2">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-[0.9375rem] leading-relaxed text-blue-100">
-                    Ready to arrange a consultation? Request an appointment and the clinic team
-                    will confirm the date and time with you.
-                  </p>
-                  <ButtonLink
-                    to={routes.bookAppointment}
-                    variant="accent"
-                    size="md"
-                    className="shrink-0"
-                    leftIcon={<CalendarDays className="h-4 w-4" aria-hidden="true" />}
-                  >
-                    Book Appointment
-                  </ButtonLink>
-                </div>
-              </li>
             </ul>
+
+            <ul className="grid auto-rows-fr gap-5">
+              {WHY_POINTS_RIGHT.map((point, index) => (
+                <li
+                  key={point.title}
+                  className={cn(
+                    'group flex items-center gap-4 rounded-2xl border border-line p-5 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-md lg:p-6',
+                    index === 0 && 'bg-gradient-to-b from-blue-50 via-white to-white hover:border-blue-200',
+                    index === 1 &&
+                      'bg-gradient-to-b from-pink-50 via-white to-white hover:border-pink-200',
+                    index === 2 &&
+                      'bg-gradient-to-b from-app via-white to-white hover:border-green-200',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm transition-colors duration-200',
+                      index === 0 && 'bg-blue-600 group-hover:bg-navy-800',
+                      index === 1 && 'bg-pink-600 group-hover:bg-navy-800',
+                      index === 2 && 'bg-green-600 group-hover:bg-navy-800',
+                    )}
+                  >
+                    <point.icon className="h-5.5 w-5.5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-[0.9375rem] font-semibold text-navy-800 text-balance">
+                      {point.title}
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-ink-soft text-pretty">
+                      {point.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Full-width booking call to action, below both columns. */}
+          <div className="relative mt-10 flex flex-col items-center gap-5 overflow-hidden rounded-2xl bg-navy-800 px-6 py-8 text-center text-white shadow-md sm:px-8 lg:flex-row lg:justify-between lg:gap-10 lg:py-9 lg:text-left">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-pink-500/20"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-24 -right-16 h-56 w-56 rounded-full bg-blue-500/20"
+            />
+
+            <div className="relative">
+              <h3 className="text-lg font-semibold text-white sm:text-xl">
+                Ready to arrange a consultation?
+              </h3>
+              <p className="mt-1.5 max-w-2xl text-[0.9375rem] leading-relaxed text-blue-100 text-pretty">
+                Request an appointment and the clinic team will confirm the date and time with you.
+              </p>
+            </div>
+
+            <ButtonLink
+              to={routes.bookAppointment}
+              variant="accent"
+              size="lg"
+              className="relative w-full shrink-0 sm:w-auto"
+              leftIcon={<CalendarDays className="h-4.5 w-4.5" aria-hidden="true" />}
+            >
+              Book Appointment
+            </ButtonLink>
           </div>
         </Container>
       </Section>
@@ -531,25 +599,27 @@ export default function HomePage() {
             id="steps-title"
           />
 
-          <ol className="mt-10 grid gap-5 sm:mt-12 sm:grid-cols-3">
+          <ol className="mt-10 grid items-stretch gap-5 sm:mt-12 sm:grid-cols-3">
             {BOOKING_STEPS.map((step, index) => (
               <li
                 key={step.title}
-                className="relative overflow-hidden rounded-2xl border border-line bg-white p-6 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+                className="group relative flex h-full flex-col items-center overflow-hidden rounded-2xl border border-line bg-white p-6 text-center shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-7"
               >
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-4 top-1 select-none font-display text-[3.75rem] font-bold leading-none text-navy-100"
+                  className="pointer-events-none absolute -top-2 right-3 select-none font-display text-[3.75rem] font-bold leading-none text-navy-100"
                 >
                   {`0${index + 1}`}
                 </span>
 
-                <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-navy-800 text-white shadow-sm">
-                  <step.icon className="h-5 w-5" aria-hidden="true" />
+                <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-800 text-white shadow-sm transition-colors duration-200 group-hover:bg-navy-900">
+                  <step.icon className="h-5.5 w-5.5" aria-hidden="true" />
                 </span>
 
-                <h3 className="relative mt-4 text-lg font-semibold text-navy-800">{step.title}</h3>
-                <p className="relative mt-2 text-sm leading-relaxed text-ink-soft">
+                <h3 className="relative mt-5 text-lg font-semibold text-navy-800 text-balance">
+                  {step.title}
+                </h3>
+                <p className="relative mt-2.5 text-sm leading-relaxed text-ink-soft text-pretty">
                   {step.description}
                 </p>
               </li>
@@ -637,55 +707,102 @@ export default function HomePage() {
       {/* ------------------------------- 9. Contact & location preview */}
       <Section tone="app" padding="lg" labelledBy="contact-preview-title">
         <Container>
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-pink-600">
-                Visit the Clinic
-              </p>
-              <h2
-                id="contact-preview-title"
-                className="mt-3 text-[1.75rem] leading-tight text-navy-800 sm:text-[2.125rem]"
-              >
-                Contact &amp; Location
-              </h2>
-              <p className="mt-4 max-w-lg text-base leading-relaxed text-ink-soft">
-                The clinic is on Kotha Kala Road in Morgah, close to Citilab. Evening consultations
-                run from {settings.clinicHours}.
-              </p>
+          <SectionHeading
+            align="left"
+            eyebrow="Visit the Clinic"
+            title="Contact &amp; Location"
+            description={`The clinic is on Kotha Kala Road in Morgah, close to Citilab. Evening consultations run from ${settings.clinicHours}.`}
+            id="contact-preview-title"
+            className="max-w-3xl"
+          />
 
-              <div className="mt-7 space-y-4 rounded-2xl border border-line bg-white p-5 shadow-sm">
-                <div className="flex gap-3">
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-semibold text-navy-800">Address</p>
-                    <address className="mt-1 text-sm not-italic leading-relaxed text-ink-soft">
-                      {settings.addressLine}
-                      <br />
-                      {settings.addressLandmark}
-                      <br />
-                      {settings.addressCity}
-                    </address>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 border-t border-line pt-4">
-                  <Clock className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-semibold text-navy-800">Opening Hours</p>
-                    <p className="mt-1 text-sm text-ink-soft">{settings.clinicHours}</p>
-                  </div>
-                </div>
+          {/* Equal-height columns: `items-stretch` (grid default) plus `h-full`
+              on each card makes both columns match regardless of content
+              length, so the edges line up at every breakpoint. */}
+          <div className="mt-10 grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2">
+            {/* -------------------------------------- Find the clinic */}
+            <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-blue-50 via-white to-white p-6 shadow-sm sm:p-7">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+                <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-blue-100/60 blur-2xl" />
               </div>
 
-              <div className="mt-4">
-                <MapLink />
+              <div className="relative flex flex-1 flex-col items-center text-center">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-800 text-white shadow-sm">
+                  <MapPin className="h-5.5 w-5.5" aria-hidden="true" />
+                </span>
+
+                <p className="mt-4 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-blue-700">
+                  Address
+                </p>
+
+                <address className="mt-2 max-w-md text-[0.9375rem] not-italic leading-relaxed text-ink-soft text-balance">
+                  {settings.addressLine}
+                  <br />
+                  {settings.addressLandmark}
+                  <br />
+                  {settings.addressCity}
+                </address>
+
+                <a
+                  href={buildMapHref(settings.mapUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() =>
+                    trackCtaClick('map', {
+                      location: 'home-contact-preview',
+                      label: 'Get directions',
+                    })
+                  }
+                  className="group/link mt-5 inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-5 text-sm font-semibold text-navy-800 shadow-sm transition-colors hover:border-blue-400 hover:bg-blue-50"
+                >
+                  <MapPin className="h-4 w-4 shrink-0 text-blue-600" aria-hidden="true" />
+                  Get Directions
+                  <ArrowUpRight
+                    className="h-4 w-4 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                  <span className="sr-only">(opens Google Maps in a new tab)</span>
+                </a>
+
+                {/* `mt-auto` keeps these pinned to the bottom edge so both
+                    columns finish at the same height. */}
+                <div className="mt-auto grid w-full gap-4 pt-6 sm:grid-cols-2 sm:gap-5">
+                  <div className="group flex items-center gap-3.5 rounded-xl border border-line bg-white/70 p-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors group-hover:bg-navy-800 group-hover:text-white">
+                      <Clock className="h-4.5 w-4.5" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-ink-faint">
+                        Opening Hours
+                      </p>
+                      <p className="mt-0.5 text-[0.9375rem] font-semibold text-navy-800">
+                        {settings.clinicHours}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="group flex items-center gap-3.5 rounded-xl border border-line bg-white/70 p-4">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-pink-50 text-pink-600 transition-colors group-hover:bg-pink-500 group-hover:text-white">
+                      <MapPin className="h-4.5 w-4.5" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-ink-faint">
+                        Area
+                      </p>
+                      <p className="mt-0.5 text-[0.9375rem] font-semibold text-navy-800">
+                        Morgah, Rawalpindi
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-              <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
-                <h3 className="text-base font-semibold text-navy-800">Talk to the clinic</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+            {/* -------------------------------------- Reach the clinic */}
+            <div className="flex h-full flex-col gap-4">
+              <div className="flex flex-1 flex-col rounded-2xl border border-line bg-white p-6 shadow-sm sm:p-7">
+                <h3 className="text-lg font-semibold text-navy-800">Talk to the clinic</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
                   For anything urgent, please call rather than requesting an appointment online.
                 </p>
 
@@ -703,47 +820,66 @@ export default function HomePage() {
                   <div className="grid gap-2.5 sm:grid-cols-2">
                     <a
                       href={buildPhoneHref(settings.phone)}
-                      className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-semibold text-navy-800 transition-colors hover:bg-app"
+                      onClick={() =>
+                        trackCtaClick('phone', {
+                          location: 'home-contact-preview',
+                          label: settings.phoneDisplay,
+                        })
+                      }
+                      className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-semibold text-navy-800 transition-colors hover:border-blue-200 hover:bg-blue-50"
                     >
-                      <Phone className="h-4 w-4 text-pink-500" aria-hidden="true" />
+                      <Phone
+                        className="h-4 w-4 text-pink-500 transition-colors group-hover:text-pink-600"
+                        aria-hidden="true"
+                      />
                       Call {settings.phoneDisplay}
                     </a>
                     <a
                       href={buildWhatsAppHref(settings.whatsappNumber, WHATSAPP_APPOINTMENT_MESSAGE)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100"
+                      onClick={() =>
+                        trackCtaClick('whatsapp', {
+                          location: 'home-contact-preview',
+                          label: settings.whatsappDisplay,
+                        })
+                      }
+                      className="group inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100"
                     >
-                      <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                      <MessageCircle
+                        className="h-4 w-4 transition-colors group-hover:text-green-600"
+                        aria-hidden="true"
+                      />
                       WhatsApp
                     </a>
                   </div>
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-2xl bg-navy-800 p-6 text-white">
+              <Link
+                to={routes.contact}
+                className="group relative flex items-center gap-4 overflow-hidden rounded-2xl bg-navy-800 p-6 text-white shadow-sm transition-colors hover:bg-navy-900"
+              >
                 <div
                   aria-hidden="true"
-                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-pink-500/20"
+                  className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-pink-500/20"
                 />
-                <SmartImage
-                  src={null}
-                  alt=""
-                  aspectRatio="16 / 7"
-                  rounded="xl"
-                  wrapperClassName="bg-white/5"
+                <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+                  <Navigation className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="relative min-w-0 flex-1">
+                  <span className="block text-[0.9375rem] font-semibold">
+                    Full contact details and directions
+                  </span>
+                  <span className="mt-0.5 block text-sm text-blue-200">
+                    Map, alternate number and enquiry form
+                  </span>
+                </span>
+                <ArrowRight
+                  className="relative h-4.5 w-4.5 shrink-0 text-pink-200 transition-transform group-hover:translate-x-1"
+                  aria-hidden="true"
                 />
-                <p className="relative mt-4 text-[0.9375rem] font-semibold">
-                  Full contact details and directions
-                </p>
-                <Link
-                  to={routes.contact}
-                  className="relative mt-2 inline-flex min-h-[32px] items-center gap-1.5 text-sm font-semibold text-pink-200 underline underline-offset-4 hover:text-white"
-                >
-                  Go to the Contact page
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </div>
+              </Link>
             </div>
           </div>
         </Container>
