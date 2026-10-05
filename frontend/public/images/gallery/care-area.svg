@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Placeholder illustration: clinic equipment and care area">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2F7FC"/><stop offset="1" stop-color="#E3EAF2"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <rect x="0" y="416" width="800" height="184" fill="#FFFFFF"/>
+  <rect x="120" y="180" width="220" height="130" rx="14" fill="#102D55" opacity="0.9"/>
+  <rect x="150" y="212" width="160" height="66" rx="8" fill="#F2F7FC" opacity="0.92"/>
+  <path d="M186 245h18l10-22 12 44 12-26h14" stroke="#E83E8C" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="386" y="120" width="300" height="190" rx="14" fill="#FFFFFF" stroke="#E3EAF2" stroke-width="3"/>
+  <circle cx="536" cy="196" r="42" fill="#31945B" opacity="0.22"/>
+  <rect x="410" y="256" width="252" height="14" rx="7" fill="#E3EAF2"/>
+  <rect x="410" y="282" width="180" height="14" rx="7" fill="#E3EAF2"/>
+  <rect x="452" y="310" width="34" height="106" fill="#2456A6" opacity="0.65"/>
+  <rect x="586" y="310" width="34" height="106" fill="#2456A6" opacity="0.65"/>
+  <circle cx="676" cy="140" r="34" fill="#E83E8C" opacity="0.16"/>
+  <text x="400" y="552" font-family="Inter, Segoe UI, sans-serif" font-size="21" fill="#667085" text-anchor="middle">Clinic photograph pending clinic approval</text>
+</svg>

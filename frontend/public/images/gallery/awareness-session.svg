@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Placeholder illustration: women's health awareness session">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F2F7FC"/><stop offset="1" stop-color="#FFF2F7"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <rect x="0" y="410" width="800" height="190" fill="#FFFFFF"/>
+  <rect x="120" y="150" width="560" height="212" rx="14" fill="#FFFFFF" stroke="#E3EAF2" stroke-width="3"/>
+  <rect x="152" y="184" width="200" height="18" rx="9" fill="#102D55"/>
+  <rect x="152" y="216" width="496" height="10" rx="5" fill="#E3EAF2"/>
+  <rect x="152" y="240" width="430" height="10" rx="5" fill="#E3EAF2"/>
+  <rect x="152" y="278" width="120" height="56" rx="10" fill="#E83E8C" opacity="0.24"/>
+  <rect x="292" y="278" width="120" height="56" rx="10" fill="#2456A6" opacity="0.22"/>
+  <rect x="432" y="278" width="120" height="56" rx="10" fill="#31945B" opacity="0.22"/>
+  <rect x="572" y="278" width="76" height="56" rx="10" fill="#102D55" opacity="0.14"/>
+  <circle cx="130" cy="130" r="46" fill="#E83E8C" opacity="0.16"/>
+  <text x="400" y="552" font-family="Inter, Segoe UI, sans-serif" font-size="21" fill="#667085" text-anchor="middle">Event photograph pending clinic approval</text>
+</svg>

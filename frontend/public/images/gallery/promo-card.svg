@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Placeholder illustration: clinic promotional material">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFF2F7"/><stop offset="1" stop-color="#FDE7F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <rect x="180" y="110" width="440" height="300" rx="18" fill="#FFFFFF" stroke="#E3EAF2" stroke-width="3"/>
+  <rect x="180" y="110" width="440" height="86" rx="18" fill="#102D55"/>
+  <rect x="180" y="170" width="440" height="26" fill="#102D55"/>
+  <rect x="216" y="140" width="130" height="16" rx="8" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="574" cy="148" r="24" fill="#E83E8C" opacity="0.9"/>
+  <rect x="216" y="232" width="250" height="20" rx="10" fill="#102D55"/>
+  <rect x="216" y="270" width="368" height="12" rx="6" fill="#667085" opacity="0.55"/>
+  <rect x="216" y="298" width="320" height="12" rx="6" fill="#667085" opacity="0.55"/>
+  <rect x="216" y="342" width="150" height="42" rx="21" fill="#E83E8C"/>
+  <rect x="382" y="342" width="150" height="42" rx="21" fill="#2456A6" opacity="0.9"/>
+  <text x="400" y="512" font-family="Inter, Segoe UI, sans-serif" font-size="21" fill="#667085" text-anchor="middle">Promotional layout pending clinic approval</text>
+</svg>

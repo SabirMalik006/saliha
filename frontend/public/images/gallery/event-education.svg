@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Placeholder illustration: clinic education event">
+  <defs>
+    <linearGradient id="g" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#102D55"/><stop offset="1" stop-color="#2456A6"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <circle cx="690" cy="110" r="120" fill="#FFFFFF" opacity="0.06"/>
+  <circle cx="90" cy="500" r="150" fill="#E83E8C" opacity="0.12"/>
+  <rect x="120" y="150" width="330" height="220" rx="14" fill="#FFFFFF" opacity="0.94"/>
+  <rect x="152" y="184" width="180" height="18" rx="9" fill="#102D55"/>
+  <rect x="152" y="222" width="266" height="10" rx="5" fill="#E3EAF2"/>
+  <rect x="152" y="248" width="220" height="10" rx="5" fill="#E3EAF2"/>
+  <rect x="152" y="296" width="266" height="44" rx="8" fill="#E83E8C" opacity="0.28"/>
+  <rect x="504" y="196" width="176" height="14" rx="7" fill="#FFFFFF" opacity="0.8"/>
+  <rect x="504" y="228" width="140" height="14" rx="7" fill="#FFFFFF" opacity="0.55"/>
+  <rect x="504" y="260" width="176" height="14" rx="7" fill="#FFFFFF" opacity="0.8"/>
+  <rect x="504" y="292" width="112" height="14" rx="7" fill="#FFFFFF" opacity="0.55"/>
+  <text x="400" y="548" font-family="Inter, Segoe UI, sans-serif" font-size="21" fill="#FFFFFF" opacity="0.78" text-anchor="middle">Event photograph pending clinic approval</text>
+</svg>
