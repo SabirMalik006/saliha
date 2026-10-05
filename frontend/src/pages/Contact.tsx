@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   AlertCircle,
   CalendarDays,
-  CheckCircle2,
   Clock,
   Info,
   Mail,
@@ -20,6 +19,7 @@ import { Container, Section } from '@/components/common/Layout';
 import { ContactQuickLinks, MapEmbed, MapLink } from '@/components/contact/ContactActions';
 import { FormAlert, HoneypotField } from '@/components/forms/Field';
 import { CharacterCount, Checkbox, SelectInput, TextArea, TextInput } from '@/components/forms/Inputs';
+import { SuccessPanel } from '@/components/feedback/SuccessPanel';
 import { Seo } from '@/components/seo/Seo';
 import { contactApi } from '@/services/contactApi';
 import { normaliseApiError, type ApiError } from '@/services/apiClient';
@@ -258,35 +258,28 @@ export default function ContactPage() {
                 </p>
 
                 {isSubmitted ? (
-                  <div
-                    ref={successRef}
-                    tabIndex={-1}
-                    role="status"
-                    className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6 text-center"
-                  >
-                    <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-green-600 shadow-sm">
-                      <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-4 text-lg font-semibold text-navy-800">Message received</h3>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
-                      {SUCCESS_MESSAGE}
-                    </p>
-                    <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                      <Button
-                        variant="primary"
-                        size="md"
-                        onClick={() => {
-                          setIsSubmitted(false);
-                          setServerError(null);
-                        }}
-                      >
-                        Send Another Message
-                      </Button>
-                      <ButtonLink to={routes.services} variant="outline" size="md">
-                        Browse Services
-                      </ButtonLink>
-                    </div>
-                  </div>
+                  <SuccessPanel
+                    panelRef={successRef}
+                    title="Message received"
+                    message={SUCCESS_MESSAGE}
+                    actions={
+                      <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                        <Button
+                          variant="primary"
+                          size="md"
+                          onClick={() => {
+                            setIsSubmitted(false);
+                            setServerError(null);
+                          }}
+                        >
+                          Send Another Message
+                        </Button>
+                        <ButtonLink to={routes.services} variant="outline" size="md">
+                          Browse Services
+                        </ButtonLink>
+                      </div>
+                    }
+                  />
                 ) : (
                   <form onSubmit={onSubmit} noValidate className="mt-6 space-y-5">
                     <div className="relative">

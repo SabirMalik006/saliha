@@ -21,6 +21,7 @@ import {
   TextArea,
   TextInput,
 } from '@/components/forms/Inputs';
+import { SuccessPanel } from '@/components/feedback/SuccessPanel';
 import { Seo } from '@/components/seo/Seo';
 import { appointmentsApi } from '@/services/appointmentsApi';
 import { normaliseApiError, type ApiError } from '@/services/apiClient';
@@ -195,58 +196,54 @@ export default function BookAppointmentPage() {
                 </div>
 
                 {isSubmitted ? (
-                  <div
-                    ref={successRef}
-                    tabIndex={-1}
-                    role="status"
-                    className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6 text-center"
-                  >
-                    <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-green-600 shadow-sm">
-                      <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-4 text-lg font-semibold text-navy-800">
-                      Request received
-                    </h3>
-                    <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
-                      {SUCCESS_MESSAGE}
-                    </p>
+                  <SuccessPanel
+                    panelRef={successRef}
+                    title="Request received"
+                    message={SUCCESS_MESSAGE}
+                    className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6 text-center outline-none"
+                    actions={
+                      <>
+                        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                          <a
+                            href={buildPhoneHref(settings.phone)}
+                            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-line bg-white px-5 text-sm font-semibold text-navy-800 transition-colors hover:bg-app"
+                          >
+                            <Phone className="h-4 w-4 text-pink-500" aria-hidden="true" />
+                            Call {settings.phoneDisplay}
+                          </a>
+                          <a
+                            href={buildWhatsAppHref(
+                              settings.whatsappNumber,
+                              WHATSAPP_APPOINTMENT_MESSAGE,
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-5 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100"
+                          >
+                            <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                            WhatsApp
+                          </a>
+                        </div>
 
-                    <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                      <a
-                        href={buildPhoneHref(settings.phone)}
-                        className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-line bg-white px-5 text-sm font-semibold text-navy-800 transition-colors hover:bg-app"
-                      >
-                        <Phone className="h-4 w-4 text-pink-500" aria-hidden="true" />
-                        Call {settings.phoneDisplay}
-                      </a>
-                      <a
-                        href={buildWhatsAppHref(settings.whatsappNumber, WHATSAPP_APPOINTMENT_MESSAGE)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-5 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100"
-                      >
-                        <MessageCircle className="h-4 w-4" aria-hidden="true" />
-                        WhatsApp
-                      </a>
-                    </div>
-
-                    <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                      <Button
-                        variant="primary"
-                        size="md"
-                        onClick={() => {
-                          setIsSubmitted(false);
-                          setServerError(null);
-                          setValue('preferredDate', '');
-                        }}
-                      >
-                        Make Another Request
-                      </Button>
-                      <ButtonLink to={routes.services} variant="outline" size="md">
-                        Browse Services
-                      </ButtonLink>
-                    </div>
-                  </div>
+                        <div className="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
+                          <Button
+                            variant="primary"
+                            size="md"
+                            onClick={() => {
+                              setIsSubmitted(false);
+                              setServerError(null);
+                              setValue('preferredDate', '');
+                            }}
+                          >
+                            Make Another Request
+                          </Button>
+                          <ButtonLink to={routes.services} variant="outline" size="md">
+                            Browse Services
+                          </ButtonLink>
+                        </div>
+                      </>
+                    }
+                  />
                 ) : (
                   <form onSubmit={onSubmit} noValidate className="mt-6 space-y-5">
                     <div className="relative">

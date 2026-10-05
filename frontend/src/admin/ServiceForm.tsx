@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Info, Save } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ImageIcon, Info, Loader2, Save, Upload, X } from 'lucide-react';
 import { Button, ButtonLink } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { FormAlert } from '@/components/forms/Field';
@@ -13,7 +13,8 @@ import { SkeletonFormPanel, SkeletonRegion } from '@/components/feedback/Skeleto
 import { useAsync } from '@/hooks/useAsync';
 import { adminApi } from '@/services/adminApi';
 import { normaliseApiError, type ApiError } from '@/services/apiClient';
-import { serviceSchema, type ServiceFormValues } from '@/schemas';
+import { ACCEPTED_IMAGE_TYPES, serviceSchema, validateImageFile, type ServiceFormValues } from '@/schemas';
+import { uploadsApi } from '@/services/uploadsApi';
 import { useToast } from '@/context/ToastContext';
 import { routes } from '@/routes/paths';
 import { slugify } from '@/utils/format';
@@ -52,6 +53,10 @@ export default function ServiceFormPage() {
   const toast = useToast();
 
   const [serverError, setServerError] = useState<ApiError | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const existing = useAsync(
     async () => (id ? adminApi.getService(id) : null),
@@ -94,9 +99,50 @@ export default function ServiceFormPage() {
     if (existing.data) reset(defaultValues);
   }, [existing.data, defaultValues, reset]);
 
+  // Uploads the chosen photo straight to Cloudinary and stores the URL in the form.
+  const onSelectImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const problem = validateImageFile(file);
+    if (problem) {
+      setUploadError(problem);
+      event.target.value = '';
+      return;
+    }
+
+    setUploadError(null);
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const uploaded = await uploadsApi.image(file, {
+        folder: 'services',
+        onProgress: setUploadProgress,
+      });
+      setValue('imageUrl', uploaded.url, { shouldDirty: true, shouldValidate: true });
+      toast.success('Photo uploaded', 'The service photo has been uploaded.');
+    } catch (error) {
+      const apiError = normaliseApiError(error);
+      setUploadError(apiError.message);
+      toast.error('Could not upload the photo', apiError.message);
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+      event.target.value = '';
+    }
+  };
+
+  const clearImage = () => {
+    setValue('imageUrl', '', { shouldDirty: true, shouldValidate: true });
+    setUploadError(null);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  };
+
   // Keep the slug in step with the title until the editor types a custom one.
   const titleValue = watch('title');
   const slugValue = watch('slug');
+  const imageUrlValue = watch('imageUrl') ?? '';
   const [slugTouched, setSlugTouched] = useState(false);
 
   useEffect(() => {
@@ -154,6 +200,7 @@ export default function ServiceFormPage() {
   }
 
   const publishErrors = serverError?.fieldErrors;
+  const imageError = errors.imageUrl?.message ?? publishErrors?.imageUrl;
 
   return (
     <>
@@ -258,14 +305,86 @@ export default function ServiceFormPage() {
                 {...register('icon')}
               />
 
-              <TextInput
-                label="Image URL"
-                type="url"
-                placeholder="https://… or leave empty"
-                hint="Optional. Leave empty to show the icon tile instead of a photo."
-                error={errors.imageUrl?.message}
-                {...register('imageUrl')}
-              />
+              <div>
+                <span className="block text-sm font-semibold text-navy-800">Service photo</span>
+                <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+                  Optional. Upload a JPG, PNG, WebP or AVIF up to 5 MB. Without a photo the card
+                  shows the icon tile instead.
+                </p>
+
+                <input
+                  ref={imageInputRef}
+                  id="service-image"
+                  type="file"
+                  accept={ACCEPTED_IMAGE_TYPES.join(',')}
+                  onChange={(event) => void onSelectImage(event)}
+                  className="sr-only"
+                />
+                {/* Keeps the uploaded URL inside react-hook-form for validation + submit. */}
+                <input type="hidden" {...register('imageUrl')} />
+
+                <div className="mt-3 overflow-hidden rounded-xl border border-line bg-app">
+                  {imageUrlValue ? (
+                    <img
+                      src={imageUrlValue}
+                      alt="Preview of the service photo"
+                      className="aspect-[16/10] w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 text-ink-faint">
+                      <ImageIcon className="h-8 w-8" aria-hidden="true" />
+                      <p className="text-sm">No photo uploaded</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={isUploading}
+                    leftIcon={
+                      isUploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Upload className="h-4 w-4" aria-hidden="true" />
+                      )
+                    }
+                  >
+                    {isUploading
+                      ? `Uploading… ${uploadProgress}%`
+                      : imageUrlValue
+                        ? 'Replace photo'
+                        : 'Upload photo'}
+                  </Button>
+
+                  {imageUrlValue && !isUploading ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearImage}
+                      leftIcon={<X className="h-4 w-4" aria-hidden="true" />}
+                    >
+                      Remove photo
+                    </Button>
+                  ) : null}
+                </div>
+
+                {uploadError ? (
+                  <p
+                    role="alert"
+                    className="mt-3 flex items-start gap-2 rounded-lg border border-pink-200 bg-pink-50 p-3 text-sm text-pink-700"
+                  >
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                    {uploadError}
+                  </p>
+                ) : null}
+
+                {imageError ? <p className="mt-2 text-sm text-pink-700">{imageError}</p> : null}
+              </div>
 
               <TextInput
                 label="Image alt text"
