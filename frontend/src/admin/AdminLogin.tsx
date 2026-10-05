@@ -102,7 +102,7 @@ export default function AdminLoginPage() {
                   autoComplete="username"
                   autoCapitalize="none"
                   spellCheck={false}
-                  placeholder="you@specialistclinic.pk"
+                  placeholder="Enter your email or username"
                   error={errors.identifier?.message}
                   {...register('identifier')}
                 />

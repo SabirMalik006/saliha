@@ -52,12 +52,15 @@ export function PublicHeader() {
 
   return (
     <>
+      {/* The header itself stays transparent once scrolled, so no full-width
+          bar ever appears — only the rounded pill carries the background. At
+          the top of a page the header picks up the first slice of the hero's
+          own blue gradient, so the pill blends into it. Both gradients end in
+          `transparent`, which keeps the join invisible. */}
       <header
         className={cn(
-          'sticky top-0 z-50 transition-[background-color,box-shadow] duration-300',
-          isScrolled
-            ? 'bg-white/85 shadow-[0_16px_36px_-24px_rgba(16,45,85,0.35)] backdrop-blur-xl'
-            : 'bg-transparent',
+          'sticky top-0 z-50 transition-[background-color] duration-300',
+          isScrolled ? 'bg-transparent' : 'bg-gradient-to-b from-blue-50 from-[70%] to-transparent',
         )}
       >
         {/* Scroll progress — sits above the pill, like a hairline of light. */}
@@ -68,13 +71,23 @@ export function PublicHeader() {
         />
 
         <div className="container-page">
-          <nav
+          <motion.nav
             aria-label="Primary"
+            // The pill animates its own colour, border and lift rather than
+            // the header bar, so scrolling turns the wide gradient strip into
+            // a compact floating pill in one smooth motion.
+            animate={{
+              backgroundColor: isScrolled ? '#ffffff' : 'rgba(240, 245, 253, 0.6)',
+              borderColor: isScrolled ? 'rgba(214, 222, 234, 1)' : 'rgba(240, 245, 253, 0)',
+              boxShadow: isScrolled
+                ? '0 18px 38px -24px rgba(16, 45, 85, 0.45)'
+                : '0 18px 36px -24px rgba(16, 45, 85, 0.4)',
+              scale: isScrolled ? 0.985 : 1,
+            }}
+            transition={{ duration: 0.35, ease: EASE }}
             className={cn(
-              'mt-2.5 flex items-center justify-between gap-3 rounded-full px-3 py-2.5 transition-shadow duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:px-4',
-              isScrolled
-                ? 'border border-line bg-white shadow-[0_22px_44px_-22px_rgba(16,45,85,0.45),0_6px_14px_-8px_rgba(16,45,85,0.25)]'
-                : 'bg-gradient-to-b from-blue-50 via-blue-50/70 to-blue-50/25 shadow-[0_18px_36px_-24px_rgba(16,45,85,0.4),0_4px_10px_-6px_rgba(16,45,85,0.2)]',
+              'mt-2.5 flex items-center justify-between gap-3 rounded-full border px-3 py-2.5 md:px-4',
+              'bg-gradient-to-b from-blue-50 via-blue-50 to-blue-50/60',
             )}
           >
             <Link
@@ -161,7 +174,7 @@ export function PublicHeader() {
                 )}
               </button>
             </div>
-          </nav>
+          </motion.nav>
         </div>
       </header>
 
