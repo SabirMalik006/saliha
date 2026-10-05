@@ -15,6 +15,7 @@ import { StatusBadge } from '@/components/common/Badge';
 import { Card } from '@/components/common/Card';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { EmptyState, ErrorState } from '@/components/feedback/States';
+import { SkeletonGalleryTile } from '@/components/feedback/Skeletons';
 import { Pagination } from '@/components/common/Pagination';
 import { SmartImage } from '@/components/common/SmartImage';
 import { TextInput } from '@/components/forms/Inputs';
@@ -201,15 +202,7 @@ export default function GalleryManagementPage() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {list.isLoading && list.items.length === 0
-              ? Array.from({ length: 6 }, (_, index) => (
-                  <Card key={index} padding="none">
-                    <div className="skeleton aspect-4/3 w-full rounded-t-2xl" />
-                    <div className="space-y-2 p-4">
-                      <div className="skeleton h-4 w-2/3" />
-                      <div className="skeleton h-3 w-full" />
-                    </div>
-                  </Card>
-                ))
+              ? Array.from({ length: 6 }, (_, index) => <SkeletonGalleryTile key={index} />)
               : list.items.map((item) => (
                   <Card key={item.id} padding="none" className="overflow-hidden">
                     <div className="relative aspect-4/3 w-full bg-app">

@@ -1,4 +1,13 @@
-import { Clock, Mail, MapPin, MessageCircle, Phone, Send, Smartphone } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Clock,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Send,
+  Smartphone,
+} from 'lucide-react';
 import { useSettings } from '@/context/SettingsContext';
 import { buildMapHref, buildMapSearchHref, buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
 import { trackCtaClick } from '@/utils/analytics';
@@ -268,6 +277,14 @@ export function MapEmbed({ className }: { className?: string }) {
    Clinic information strip
    ========================================================================== */
 
+/**
+ * Clinic information block: address on the left, contact details on the right.
+ *
+ * The previous version gave all five facts equal weight in a 5-column grid,
+ * which made the one line that actually needs reading — the address — the
+ * hardest to read. Address and directions get the large panel here; timings
+ * and the three numbers sit in a tidy list beside it.
+ */
 export function ClinicInfoStrip({
   layout = 'grid',
   className,
@@ -279,111 +296,176 @@ export function ClinicInfoStrip({
 }) {
   const { settings } = useSettings();
 
-  const items = [
-    {
-      icon: MapPin,
-      title: 'Address',
-      lines: [settings.addressLine, settings.addressLandmark, settings.addressCity],
-    },
+  const contacts = [
     {
       icon: Clock,
       title: 'Clinic Time',
-      lines: [settings.clinicHours],
+      value: settings.clinicHours,
     },
     {
       icon: Phone,
       title: 'Phone',
-      lines: [settings.phoneDisplay],
+      value: settings.phoneDisplay,
       href: buildPhoneHref(settings.phone),
       cta: 'phone' as const,
+      tone: 'blue' as const,
     },
     {
       icon: MessageCircle,
       title: 'WhatsApp',
-      lines: [settings.whatsappDisplay],
+      value: settings.whatsappDisplay,
       href: buildWhatsAppHref(settings.whatsappNumber),
       external: true,
       cta: 'whatsapp' as const,
+      tone: 'green' as const,
     },
     {
       icon: Smartphone,
       title: 'Alternate Contact',
-      lines: [settings.alternatePhoneDisplay],
+      value: settings.alternatePhoneDisplay,
       href: buildPhoneHref(settings.alternatePhone),
       cta: 'phone' as const,
+      tone: 'navy' as const,
     },
   ];
 
+  const toneClasses = {
+    blue: 'bg-blue-50 text-blue-600 group-hover:bg-navy-800 group-hover:text-white',
+    green: 'bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white',
+    navy: 'bg-navy-50 text-navy-600 group-hover:bg-navy-800 group-hover:text-white',
+  } as const;
+
   return (
-    <ul
+    <div
       className={cn(
-        layout === 'grid'
-          ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-5'
-          : 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3',
+        'grid gap-5 lg:grid-cols-12 lg:gap-6',
+        layout === 'cards' && 'lg:grid-cols-1',
         className,
       )}
     >
-      {items.map((item) => {
-        const Icon = item.icon;
-        const content = (
-          <>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-navy-800 group-hover:text-white">
-              <Icon className="h-4.5 w-4.5" aria-hidden="true" />
-            </span>
-            <span className="min-w-0">
-              <span className="block text-xs font-semibold uppercase tracking-[0.1em] text-ink-faint">
-                {item.title}
-              </span>
-              <span className="mt-1 block text-sm font-semibold text-navy-800">
-                {item.href ? (
-                  item.lines[0]
-                ) : (
-                  item.lines.map((line, index) => (
-                    <span key={line} className="block">
-                      {line}
-                      {index < item.lines.length - 1 ? <br /> : null}
-                    </span>
-                  ))
-                )}
-                {item.href && item.lines.length > 1 ? (
-                  <>
-                    <br />
-                    {item.lines.slice(1)}
-                  </>
-                ) : null}
-              </span>
-            </span>
-          </>
-        );
+      {/* ---------------------------------------------- Address panel */}
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-blue-50 via-white to-white p-6 shadow-sm lg:col-span-7 sm:p-7">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-blue-100/60 blur-2xl" />
+        </div>
 
-        return (
-          <li key={item.title}>
-            {item.href ? (
-              <a
-                href={item.href}
-                target={item.external ? '_blank' : undefined}
-                rel={item.external ? 'noopener noreferrer' : undefined}
-                onClick={() =>
-                  'cta' in item && item.cta
-                    ? trackCtaClick(item.cta, {
-                        location,
-                        label: item.lines[0],
-                      })
-                    : undefined
-                }
-                className="group flex h-full min-h-[44px] items-start gap-3 rounded-2xl border border-line bg-white p-4 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+        <div className="relative">
+          <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-navy-800 text-white shadow-sm">
+            <MapPin className="h-5.5 w-5.5" aria-hidden="true" />
+          </span>
+
+          <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-blue-700">
+            Address
+          </p>
+
+          <address className="mt-2 max-w-xl text-[1.0625rem] font-semibold not-italic leading-relaxed text-navy-800 text-balance">
+            {settings.addressLine}
+          </address>
+
+          <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-soft">
+            {settings.addressLandmark}
+            <br />
+            {settings.addressCity}
+          </p>
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <a
+              href={buildMapHref(settings.mapUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackCtaClick('map', { location, label: 'Get directions' })}
+              className="group inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-navy-800 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-navy-900"
+            >
+              <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
+              Get Directions
+              <span className="sr-only">(opens Google Maps in a new tab)</span>
+            </a>
+
+            <a
+              href={buildMapSearchHref()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackCtaClick('map', { location, label: 'Open in Google Maps' })}
+              className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-line bg-white px-5 text-sm font-semibold text-navy-800 transition-colors hover:bg-blue-50"
+            >
+              Open in Google Maps
+              <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          </div>
+
+          <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-faint">
+            <span>Coordinates:</span>
+            <span className="font-semibold text-navy-700">{CLINIC_COORDINATES_DISPLAY}</span>
+          </p>
+        </div>
+      </div>
+
+      {/* ---------------------------------------- Contact details list */}
+      <ul
+        className={cn(
+          'grid gap-4 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1 lg:content-start',
+          layout === 'cards' && 'lg:col-span-1',
+        )}
+      >
+        {contacts.map((item) => {
+          const Icon = item.icon;
+          const tone = 'tone' in item && item.tone ? item.tone : 'blue';
+          const body = (
+            <>
+              <span
+                className={cn(
+                  'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-200',
+                  toneClasses[tone],
+                )}
               >
-                {content}
-              </a>
-            ) : (
-              <div className="group flex h-full items-start gap-3 rounded-2xl border border-line bg-white p-4 shadow-sm">
-                {content}
-              </div>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+                <Icon className="h-4.5 w-4.5" aria-hidden="true" />
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="block text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-ink-faint">
+                  {item.title}
+                </span>
+                <span className="mt-1 block text-[1.0625rem] font-semibold tabular-nums text-navy-800 transition-colors group-hover:text-blue-600">
+                  {item.value}
+                </span>
+              </span>
+
+              {'href' in item && item.href ? (
+                <ArrowUpRight
+                  className="mt-1 h-4 w-4 shrink-0 text-ink-faint transition-[color,transform] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-blue-600"
+                  aria-hidden="true"
+                />
+              ) : null}
+            </>
+          );
+
+          return (
+            <li key={item.title}>
+              {'href' in item && item.href ? (
+                <a
+                  href={item.href}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
+                  onClick={() =>
+                    'cta' in item && item.cta
+                      ? trackCtaClick(item.cta, { location, label: item.value })
+                      : undefined
+                  }
+                  className="group flex h-full items-center gap-4 rounded-2xl border border-line bg-white p-4 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                >
+                  {body}
+                </a>
+              ) : (
+                <div className="group flex h-full items-center gap-4 rounded-2xl border border-line bg-white p-4 shadow-sm">
+                  {body}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

@@ -5,7 +5,11 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Container, Section } from '@/components/common/Layout';
 import { ServiceGrid } from '@/components/services/ServiceCard';
 import { ConsultationBanner } from '@/components/contact/ConsultationBanner';
-import { EmptyState, ErrorState, SkeletonGrid } from '@/components/feedback/States';
+import { EmptyState, ErrorState } from '@/components/feedback/States';
+import {
+  SkeletonRegion,
+  SkeletonServiceGrid,
+} from '@/components/feedback/Skeletons';
 import { Seo } from '@/components/seo/Seo';
 import { useSettings } from '@/context/SettingsContext';
 import { usePublishedServices } from '@/hooks/useServices';
@@ -99,11 +103,16 @@ export default function ServicesPage() {
 
           {/* Search — operates on live service data */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-ink-soft" role="status" aria-live="polite">
-              {isLoading
-                ? 'Loading services…'
-                : `Showing ${visibleServices.length} of ${services.length} service${services.length === 1 ? '' : 's'}`}
-            </p>
+            {isLoading ? (
+              <div className="h-5 w-52" aria-hidden="true">
+                <div className="skeleton h-4 w-full" />
+              </div>
+            ) : (
+              <p className="text-sm text-ink-soft" role="status" aria-live="polite">
+                Showing {visibleServices.length} of {services.length} service
+                {services.length === 1 ? '' : 's'}
+              </p>
+            )}
 
             <div className="relative w-full sm:max-w-xs">
               <label htmlFor="service-search" className="sr-only">
@@ -128,7 +137,9 @@ export default function ServicesPage() {
 
           <div className="mt-8">
             {isLoading ? (
-              <SkeletonGrid count={6} />
+              <SkeletonRegion label="Loading services">
+                <SkeletonServiceGrid count={6} columns={3} />
+              </SkeletonRegion>
             ) : error ? (
               <ErrorState
                 message="The services list could not be loaded. Please try again, or contact the clinic directly."

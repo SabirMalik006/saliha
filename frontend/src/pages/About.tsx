@@ -123,8 +123,8 @@ export default function AboutPage() {
           <div className="mt-8 grid items-center gap-8 lg:grid-cols-12 lg:gap-14">
             <div className="lg:col-span-5">
               <PortraitSlot
-                imageUrl={null}
-                imageAlt={null}
+                imageUrl="/images/doctor/dr-saleha.png"
+                imageAlt={`Portrait of ${settings.doctorName}`}
                 className="mx-auto max-w-sm lg:max-w-none"
               />
             </div>

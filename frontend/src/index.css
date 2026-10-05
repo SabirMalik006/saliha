@@ -76,6 +76,9 @@
     'Inter', 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
 
+  /* Editorial display face for headings and the logo lockup. */
+  --font-display: 'Playfair Display', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+
   /* Radii */
   --radius-xs: 0.375rem;
   --radius-sm: 0.5rem;
@@ -155,6 +158,14 @@
     letter-spacing: -0.017em;
     line-height: 1.22;
     text-wrap: balance;
+  }
+
+  /* Display headings read as an editorial serif — the site's premium voice. */
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   p {
@@ -285,16 +296,37 @@
   color: transparent;
 }
 
+/*
+ * Skeleton placeholder base.
+ *
+ * A moving highlight reads as "loading" far better than a flat grey block,
+ * and `currentColor` on the border means skeletons sit correctly on both the
+ * white public pages and the tinted admin canvas.
+ */
 @utility skeleton {
   background-image: linear-gradient(
     90deg,
-    var(--color-navy-50) 0%,
-    var(--color-blue-50) 50%,
-    var(--color-navy-50) 100%
+    var(--color-slate-100) 0%,
+    var(--color-slate-200) 20%,
+    var(--color-slate-100) 40%
   );
-  background-size: 200% 100%;
+  background-size: 250% 100%;
   animation: var(--animate-shimmer);
   border-radius: var(--radius-md);
+}
+
+/* Circle variant, for icon and avatar placeholders. */
+@utility skeleton-circle {
+  border-radius: 9999px;
+}
+
+/* Skeletons must stop shimmering for visitors who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background-image: none;
+    background-color: var(--color-slate-100);
+  }
 }
 
 /* Decorative dot grid used behind selected sections */
@@ -340,6 +372,7 @@
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;

@@ -143,20 +143,24 @@ export function PortraitSlot({
   className?: string;
   caption?: ReactNode;
 }) {
-  const hasImage = Boolean(imageUrl);
+  // Narrowed once so the JSX branch below gives `portraitSrc: string`.
+  const portraitSrc = imageUrl && imageUrl.trim() !== '' ? imageUrl : null;
 
   return (
     <figure className={cn('relative', className)}>
-      {hasImage ? (
+      {portraitSrc ? (
         <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-blue-50 via-white to-pink-50 shadow-md">
-          <SmartImage
-            src={imageUrl}
-            alt={imageAlt ?? 'Approved portrait of Dr. Saleha Ibtisam'}
-            aspectRatio="4 / 5"
-            rounded="none"
-            wrapperClassName="w-full"
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+            <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-pink-100/80 blur-2xl" />
+            <div className="absolute -left-10 bottom-24 h-36 w-36 rounded-full bg-blue-100/80 blur-2xl" />
+          </div>
+          <img
+            src={portraitSrc}
+            alt={imageAlt ?? 'Portrait of Dr. Saleha Ibtisam'}
             loading="eager"
             fetchPriority="high"
+            decoding="async"
+            className="relative mx-auto block h-[340px] w-auto max-w-full object-contain object-bottom sm:h-[420px] lg:h-[460px]"
           />
         </div>
       ) : (

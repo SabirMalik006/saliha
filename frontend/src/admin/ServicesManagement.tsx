@@ -15,6 +15,7 @@ import { StatusBadge } from '@/components/common/Badge';
 import { Card } from '@/components/common/Card';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { EmptyState, ErrorState } from '@/components/feedback/States';
+import { SkeletonAdminRow } from '@/components/feedback/Skeletons';
 import { TextInput } from '@/components/forms/Inputs';
 import { Pagination } from '@/components/common/Pagination';
 import { useAdminList, type AdminListResult } from '@/hooks/useAdminList';
@@ -162,12 +163,7 @@ export default function ServicesManagementPage() {
       ) : (
         <div className="space-y-3">
           {list.isLoading && list.items.length === 0
-            ? Array.from({ length: 5 }, (_, index) => (
-                <Card key={index} padding="md">
-                  <div className="skeleton h-6 w-1/3" />
-                  <div className="skeleton mt-3 h-4 w-2/3" />
-                </Card>
-              ))
+            ? Array.from({ length: 5 }, (_, index) => <SkeletonAdminRow key={index} />)
             : list.items.map((service) => (
                 <Card key={service.id} padding="md">
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

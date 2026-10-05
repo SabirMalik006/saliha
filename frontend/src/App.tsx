@@ -7,7 +7,7 @@ import {
   RequireAuth,
 } from '@/components/navigation/RouteGuards';
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary';
-import { LoadingState } from '@/components/feedback/States';
+import { SkeletonPageBody, SkeletonRegion } from '@/components/feedback/Skeletons';
 import { usePageViewTracking } from '@/hooks/usePageViewTracking';
 import { routes } from '@/routes/paths';
 
@@ -32,11 +32,18 @@ const InquiriesManagementPage = lazy(() => import('@/admin/InquiriesManagement')
 const AppointmentsManagementPage = lazy(() => import('@/admin/AppointmentsManagement'));
 const SiteSettingsPage = lazy(() => import('@/admin/SiteSettings'));
 
+/**
+ * Route-level fallback.
+ *
+ * A skeleton rather than a spinner: the page's hero shape is predictable, so
+ * showing it immediately removes the "blank flash then jump" effect of a
+ * centred loader.
+ */
 function RouteFallback() {
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <LoadingState label="Loading page…" />
-    </div>
+    <SkeletonRegion label="Loading page" className="block">
+      <SkeletonPageBody />
+    </SkeletonRegion>
   );
 }
 

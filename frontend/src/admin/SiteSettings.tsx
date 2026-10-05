@@ -7,7 +7,8 @@ import { Card } from '@/components/common/Card';
 import { FormAlert } from '@/components/forms/Field';
 import { TextArea, TextInput } from '@/components/forms/Inputs';
 import { Seo } from '@/components/seo/Seo';
-import { ErrorState, SkeletonCard } from '@/components/feedback/States';
+import { ErrorState } from '@/components/feedback/States';
+import { SkeletonFormPanel, SkeletonRegion } from '@/components/feedback/Skeletons';
 import { useAsync } from '@/hooks/useAsync';
 import { adminApi } from '@/services/adminApi';
 import { normaliseApiError, type ApiError } from '@/services/apiClient';
@@ -140,10 +141,9 @@ export default function SiteSettingsPage() {
 
   if (settings.isLoading) {
     return (
-      <div className="space-y-5">
-        <SkeletonCard />
-        <SkeletonCard />
-      </div>
+      <SkeletonRegion label="Loading site settings">
+        <SkeletonFormPanel count={4} />
+      </SkeletonRegion>
     );
   }
 

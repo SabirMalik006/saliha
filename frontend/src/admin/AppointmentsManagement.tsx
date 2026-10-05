@@ -7,6 +7,11 @@ import { Modal } from '@/components/common/Modal';
 import { Pagination } from '@/components/common/Pagination';
 import { SelectInput, TextArea, TextInput } from '@/components/forms/Inputs';
 import { EmptyState, ErrorState } from '@/components/feedback/States';
+import {
+  SkeletonListRows,
+  SkeletonModal,
+  SkeletonRegion,
+} from '@/components/feedback/Skeletons';
 import { useAdminList, type AdminListResult } from '@/hooks/useAdminList';
 import { useAsync } from '@/hooks/useAsync';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -166,6 +171,13 @@ export default function AppointmentsManagementPage() {
               : 'Requests submitted through the website booking form will appear here.'
           }
         />
+      ) : list.isLoading && list.items.length === 0 ? (
+        <SkeletonRegion
+          label="Loading appointment requests"
+          className="overflow-hidden rounded-2xl border border-line bg-white"
+        >
+          <SkeletonListRows count={5} />
+        </SkeletonRegion>
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border border-line bg-white">
@@ -276,10 +288,9 @@ export default function AppointmentsManagementPage() {
         }
       >
         {detail.isLoading ? (
-          <div className="space-y-3">
-            <div className="skeleton h-4 w-1/2" />
-            <div className="skeleton h-24 w-full" />
-          </div>
+          <SkeletonRegion label="Loading appointment details">
+            <SkeletonModal />
+          </SkeletonRegion>
         ) : detail.error ? (
           <ErrorState
             title="We could not load this appointment"

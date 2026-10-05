@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   ArrowRight,
   BadgeCheck,
+  CalendarCheck,
   CalendarDays,
   Clock,
   HeartHandshake,
@@ -19,8 +20,11 @@ import { ConsultationBanner } from '@/components/contact/ConsultationBanner';
 import { ClinicInfoStrip, MapLink } from '@/components/contact/ContactActions';
 import { GalleryGrid, GalleryLightbox } from '@/components/gallery/GalleryGrid';
 import { SmartImage, PortraitSlot } from '@/components/common/SmartImage';
-import { ClinicLogo } from '@/components/brand/ClinicLogo';
-import { SkeletonGrid } from '@/components/feedback/States';
+import {
+  SkeletonGalleryGrid,
+  SkeletonRegion,
+  SkeletonServiceGrid,
+} from '@/components/feedback/Skeletons';
 import { Seo, buildPhysicianSchema } from '@/components/seo/Seo';
 import { useSettings } from '@/context/SettingsContext';
 import { useFeaturedServices } from '@/hooks/useServices';
@@ -28,10 +32,35 @@ import { useGallery } from '@/hooks/useGallery';
 import { routes } from '@/routes/paths';
 import { buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
 import {
+  CLINIC_CONTACT,
+  CLINIC_HOURS_DISPLAY,
   CLINIC_QUICK_SUMMARY,
   CLINIC_SERVICE_SUMMARY_SENTENCE,
   WHATSAPP_APPOINTMENT_MESSAGE,
 } from '@/constants/clinic';
+
+/**
+ * Three-step booking path. Every detail here mirrors the clinic's documented
+ * process (request → clinic confirms → evening visit); nothing is invented.
+ */
+const BOOKING_STEPS = [
+  {
+    icon: Phone,
+    title: 'Request your appointment',
+    description: `Call ${CLINIC_CONTACT.phoneDisplay}, send a WhatsApp message, or fill the online appointment form — whichever is easiest for you.`,
+  },
+  {
+    icon: CalendarCheck,
+    title: 'We confirm your time',
+    description:
+      'The clinic team contacts you to confirm the date and time. A request is only a booking once you hear back from us.',
+  },
+  {
+    icon: Stethoscope,
+    title: 'Visit the clinic',
+    description: `Evening consultations run ${CLINIC_HOURS_DISPLAY} at Kotha Kala Road, Morgah, near Citilab, Rawalpindi.`,
+  },
+] as const;
 
 const WHY_POINTS = [
   {
@@ -74,6 +103,13 @@ export default function HomePage() {
 
   const galleryPreview = gallery.items.slice(0, 6);
 
+  const heroTrust = [
+    { icon: BadgeCheck, label: 'Qualifications', value: settings.doctorQualifications.join(' • ') },
+    { icon: Stethoscope, label: 'Specialist Focus', value: settings.doctorDesignation },
+    { icon: Clock, label: 'Evening Clinic', value: settings.clinicHours },
+    { icon: MapPin, label: 'Location', value: CLINIC_QUICK_SUMMARY.location },
+  ];
+
   const jsonLd = buildPhysicianSchema({
     name: settings.doctorName,
     jobTitle: settings.doctorDesignation,
@@ -103,10 +139,13 @@ export default function HomePage() {
           <div className="absolute -left-32 top-40 h-[20rem] w-[20rem] rounded-full bg-blue-100/70 blur-2xl" />
         </div>
 
-        <Container className="relative py-12 sm:py-16 lg:py-20">
-          <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+        <Container className="relative pb-12 pt-6 sm:pb-14 sm:pt-8 lg:pb-14 lg:pt-9">
+          <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-14">
             <div className="lg:col-span-6">
-              <p className="inline-flex flex-wrap items-center gap-2 rounded-full border border-pink-200 bg-pink-50 px-3.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-pink-700 sm:text-xs">
+              <p
+                className="inline-flex animate-fade-up flex-wrap items-center gap-2 rounded-full border border-pink-200 bg-pink-50 px-3.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-pink-700 sm:text-xs"
+                style={{ animationDelay: '0ms' }}
+              >
                 <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                 Specialist Clinic
                 <span aria-hidden="true" className="text-pink-300">•</span>
@@ -115,17 +154,24 @@ export default function HomePage() {
 
               <h1
                 id="hero-title"
-                className="mt-5 text-[2rem] leading-[1.12] tracking-[-0.02em] text-navy-800 sm:text-[2.5rem] lg:text-[3rem]"
+                className="mt-5 animate-fade-up text-[2.125rem] leading-[1.1] tracking-[-0.02em] text-navy-800 sm:text-[2.6rem] lg:text-[3.15rem]"
+                style={{ animationDelay: '70ms' }}
               >
                 Expert Gynecology &amp; Obstetric Care in{' '}
                 <span className="text-gradient-brand">Morgah, Rawalpindi</span>
               </h1>
 
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft sm:text-[1.0625rem] sm:leading-[1.7]">
+              <p
+                className="mt-5 max-w-xl animate-fade-up text-base leading-relaxed text-ink-soft sm:text-[1.0625rem] sm:leading-[1.7]"
+                style={{ animationDelay: '140ms' }}
+              >
                 Dr. Saleha Ibtisam {CLINIC_SERVICE_SUMMARY_SENTENCE}
               </p>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <div
+                className="mt-7 flex animate-fade-up flex-col gap-3 sm:flex-row sm:flex-wrap"
+                style={{ animationDelay: '210ms' }}
+              >
                 <ButtonLink
                   to={routes.bookAppointment}
                   variant="accent"
@@ -146,90 +192,106 @@ export default function HomePage() {
                 </a>
               </div>
 
-              <dl className="mt-8 grid gap-3 sm:grid-cols-2">
-                <div className="flex items-start gap-3 rounded-xl border border-line bg-white/80 p-3.5">
-                  <Clock className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" aria-hidden="true" />
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-faint">
-                      Clinic Time
-                    </dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-navy-800">
-                      {settings.clinicHours}
-                    </dd>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-xl border border-line bg-white/80 p-3.5">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" aria-hidden="true" />
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-faint">
-                      Location
-                    </dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-navy-800">
-                      {CLINIC_QUICK_SUMMARY.location}
-                    </dd>
-                  </div>
-                </div>
-              </dl>
             </div>
 
-            {/* Hero visual — CTG trace motif plus approved-portrait slot. */}
+            {/* Hero visual — doctor cutout portrait on a soft brand backdrop. */}
             <div className="lg:col-span-6">
-              <div className="relative mx-auto max-w-lg">
+              <div className="relative mx-auto mt-4 max-w-md animate-fade-up sm:mt-0" style={{ animationDelay: '280ms' }}>
                 <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-blue-100/70 via-transparent to-pink-100/70 blur-xl" aria-hidden="true" />
 
-                <div className="relative overflow-hidden rounded-3xl border border-line bg-white p-5 shadow-lg sm:p-6">
-                  <div className="flex items-center gap-3">
-                    <ClinicLogo
-                      size="md"
-                      className="h-16 w-16 rounded-xl ring-1 ring-inset ring-line sm:h-20 sm:w-20"
-                      title=""
-                    />
-                    <div className="min-w-0">
-                      <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-pink-600">
-                        Consultant Gynecologist &amp; Obstetrician
-                      </p>
-                      <p className="mt-1.5 text-lg font-bold text-navy-800">
-                        {settings.doctorName}
-                      </p>
-                      <ul className="mt-2 flex flex-wrap gap-1.5">
-                        {settings.doctorQualifications.map((qualification) => (
-                          <li
-                            key={qualification}
-                            className="inline-flex items-center gap-1 rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-700 ring-1 ring-inset ring-navy-100"
-                          >
-                            <BadgeCheck className="h-3 w-3" aria-hidden="true" />
-                            {qualification}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                {/* Floating quick-fact chips — the details patients look for first. */}
+                <span className="absolute -left-4 top-8 z-10 hidden items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-navy-800 shadow-lg sm:inline-flex lg:-left-8">
+                  <span className="relative flex h-2 w-2" aria-hidden="true">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                  </span>
+                  Evening Clinic · {settings.clinicHours}
+                </span>
+                <a
+                  href={buildPhoneHref(settings.phone)}
+                  className="absolute -right-4 bottom-44 z-10 hidden items-center gap-2 rounded-full border border-line bg-white px-3.5 py-2 text-xs font-semibold text-navy-800 shadow-lg transition-colors hover:text-pink-600 sm:inline-flex lg:-right-8"
+                >
+                  <Phone className="h-3.5 w-3.5 text-pink-500" aria-hidden="true" />
+                  {settings.phoneDisplay}
+                </a>
+
+                <div className="relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-b from-blue-50 via-white to-pink-50 shadow-xl">
+                  <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+                    <div className="absolute -right-12 -top-12 h-44 w-44 rounded-full bg-pink-100/80 blur-2xl" />
+                    <div className="absolute -left-12 top-1/3 h-40 w-40 rounded-full bg-blue-100/80 blur-2xl" />
                   </div>
 
-                  <div
-                    className="mt-5 rounded-2xl border border-line bg-app p-4"
-                    aria-hidden="true"
-                  >
-                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-ink-faint">
-                      Care Philosophy
+                  <img
+                    src="/images/doctor/dr-saleha.png"
+                    alt={`Portrait of ${settings.doctorName}, ${settings.doctorDesignation}`}
+                    width={820}
+                    height={1199}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="relative mx-auto block h-[360px] w-auto max-w-full object-contain object-bottom sm:h-[400px] lg:h-[410px]"
+                  />
+
+                  <div className="relative border-t border-line/70 bg-white/85 px-5 py-4 text-center backdrop-blur-sm sm:px-6 sm:py-5">
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-pink-600">
+                      {settings.doctorDesignation}
                     </p>
-                    <p className="mt-1.5 text-sm font-semibold text-navy-800 sm:text-[0.9375rem]">
-                      {settings.carePhilosophy}
+                    <p className="mt-1.5 font-display text-xl font-bold text-navy-800 sm:text-[1.375rem]">
+                      {settings.doctorName}
                     </p>
-                    <svg viewBox="0 0 300 48" className="mt-3 h-10 w-full text-blue-400">
-                      <path
-                        d="M0 24h44l10-14 12 28 12-20 10 6h44l10-14 12 28 12-20 10 6h84"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <ul className="mt-3 flex flex-wrap justify-center gap-1.5">
+                      {settings.doctorQualifications.map((qualification) => (
+                        <li
+                          key={qualification}
+                          className="inline-flex items-center gap-1 rounded-full bg-navy-50 px-2.5 py-0.5 text-xs font-bold text-navy-700 ring-1 ring-inset ring-navy-100"
+                        >
+                          <BadgeCheck className="h-3 w-3" aria-hidden="true" />
+                          {qualification}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Trust strip — four verified facts as compact gradient-accent stat cards. */}
+          <ul
+            className="relative mt-8 grid animate-fade-up grid-cols-2 gap-4 sm:gap-5 lg:mt-10 lg:grid-cols-4"
+            style={{ animationDelay: '360ms' }}
+            aria-label="Clinic at a glance"
+          >
+            {heroTrust.map((item) => (
+              <li
+                key={item.label}
+                className="group relative flex h-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-line bg-white p-5 text-center shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg sm:p-6"
+              >
+                {/* Top brand accent */}
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-pink-500 opacity-70 transition-opacity duration-200 group-hover:opacity-100"
+                />
+                {/* Soft corner glow that warms up on hover */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-blue-50/70 blur-2xl transition-colors duration-300 group-hover:bg-pink-50/80"
+                />
+
+                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 via-white to-pink-50 text-blue-600 shadow-sm ring-1 ring-inset ring-blue-100 transition-transform duration-200 group-hover:scale-105">
+                  <item.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+
+                <p className="relative mt-3.5 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-ink-faint">
+                  {item.label}
+                </p>
+                {/* text-balance keeps the long location/designation strings even */}
+                <p className="relative mt-1.5 text-sm font-semibold leading-snug text-balance text-navy-800 sm:text-[0.9375rem]">
+                  {item.value}
+                </p>
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
@@ -239,8 +301,8 @@ export default function HomePage() {
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
             <div className="lg:col-span-4">
               <PortraitSlot
-                imageUrl={null}
-                imageAlt={null}
+                imageUrl="/images/doctor/dr-saleha.png"
+                imageAlt={`Portrait of ${settings.doctorName}`}
                 caption={`${settings.doctorName} — ${settings.doctorDesignation}`}
                 className="mx-auto max-w-xs lg:max-w-none"
               />
@@ -309,6 +371,8 @@ export default function HomePage() {
       <Section tone="app" padding="lg" labelledBy="services-title">
         <Container>
           <SectionHeading
+            align="center"
+            id="services-title"
             eyebrow="What We Treat"
             title="Women's Health Services"
             description="Consultations covering pregnancy, gynecology, fertility, family planning and menopause. Every service below can be requested as an evening appointment."
@@ -326,16 +390,28 @@ export default function HomePage() {
 
           <div className="mt-10 sm:mt-12">
             {featured.isLoading ? (
-              <SkeletonGrid count={8} />
+              <SkeletonRegion
+                label="Loading services"
+                className="[&>*]:opacity-100"
+              >
+                <SkeletonServiceGrid count={8} columns={4} />
+              </SkeletonRegion>
             ) : featured.error ? (
               <div
                 role="alert"
-                className="rounded-2xl border border-pink-200 bg-pink-50 px-6 py-10 text-center"
+                className="flex flex-col items-center rounded-2xl border border-pink-200 bg-pink-50 px-6 py-12 text-center"
               >
-                <p className="text-sm font-semibold text-navy-800">
+                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-pink-600 shadow-sm">
+                  <Stethoscope className="h-7 w-7" aria-hidden="true" />
+                </span>
+                <h3 className="mt-4 text-lg font-semibold text-navy-800">
                   We could not load the services list right now.
+                </h3>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
+                  This is a temporary connection issue, not a clinic change. Open the full services
+                  page, or ask us directly and we will guide you.
                 </p>
-                <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
                   <ButtonLink to={routes.services} variant="primary" size="md">
                     Go to Services
                   </ButtonLink>
@@ -351,18 +427,20 @@ export default function HomePage() {
                 </div>
               </div>
             ) : featured.services.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-line-strong bg-white px-6 py-10 text-center text-sm text-ink-soft">
-                No published services are available yet. Please contact the clinic on{' '}
-                <a
-                  href={buildPhoneHref(settings.phone)}
-                  className="font-semibold text-blue-600 underline underline-offset-4"
-                >
-                  {settings.phoneDisplay}
-                </a>
-                .
-              </p>
+              <div className="rounded-2xl border border-dashed border-line-strong bg-white px-6 py-12 text-center">
+                <p className="text-sm text-ink-soft">
+                  No published services are available yet. Please contact the clinic on{' '}
+                  <a
+                    href={buildPhoneHref(settings.phone)}
+                    className="font-semibold text-blue-600 underline underline-offset-4"
+                  >
+                    {settings.phoneDisplay}
+                  </a>
+                  .
+                </p>
+              </div>
             ) : (
-              <ServiceGrid services={featured.services} variant="compact" />
+              <ServiceGrid services={featured.services} variant="compact" columns={4} />
             )}
           </div>
         </Container>
@@ -443,14 +521,56 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      {/* ------------------------------- 5. Conversion banner */}
+      {/* ------------------------------- 5. How it works */}
+      <Section tone="app" padding="lg" labelledBy="steps-title">
+        <Container>
+          <SectionHeading
+            eyebrow="How It Works"
+            title="Booking an appointment takes three steps"
+            description="No queues and no guesswork — reach the clinic directly and the team confirms your date and time."
+            id="steps-title"
+          />
+
+          <ol className="mt-10 grid gap-5 sm:mt-12 sm:grid-cols-3">
+            {BOOKING_STEPS.map((step, index) => (
+              <li
+                key={step.title}
+                className="relative overflow-hidden rounded-2xl border border-line bg-white p-6 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+              >
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-4 top-1 select-none font-display text-[3.75rem] font-bold leading-none text-navy-100"
+                >
+                  {`0${index + 1}`}
+                </span>
+
+                <span className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-navy-800 text-white shadow-sm">
+                  <step.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+
+                <h3 className="relative mt-4 text-lg font-semibold text-navy-800">{step.title}</h3>
+                <p className="relative mt-2 text-sm leading-relaxed text-ink-soft">
+                  {step.description}
+                </p>
+              </li>
+            ))}
+          </ol>
+
+          <p className="mt-7 text-center text-sm text-ink-soft">
+            An appointment request is not a confirmed booking — the clinic team contacts you to
+            confirm the date and time.
+          </p>
+        </Container>
+      </Section>
+
+      {/* ------------------------------- 6. Conversion banner */}
       <Section tone="white" padding="md">
         <Container>
           <ConsultationBanner footnote={`Clinic time: ${settings.clinicHours}`} />
         </Container>
       </Section>
 
-      {/* ------------------------------- 6. Clinic information strip */}
+      {/* ------------------------------- 7. Clinic information strip */}
       <Section tone="subtle" padding="lg" labelledBy="clinic-info-title">
         <Container>
           <SectionHeading
@@ -466,7 +586,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      {/* ------------------------------- 7. Gallery preview */}
+      {/* ------------------------------- 8. Gallery preview */}
       <Section tone="white" padding="lg" labelledBy="gallery-preview-title">
         <Container>
           <SectionHeading
@@ -487,13 +607,11 @@ export default function HomePage() {
 
           <div className="mt-10">
             {gallery.isLoading ? (
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-                {Array.from({ length: 6 }, (_, index) => (
-                  <div key={index} className="skeleton aspect-[4/3] w-full" />
-                ))}
-              </div>
+              <SkeletonRegion label="Loading gallery images">
+                <SkeletonGalleryGrid count={6} preview />
+              </SkeletonRegion>
             ) : galleryPreview.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-line-strong bg-app px-6 py-10 text-center text-sm text-ink-soft">
+              <p className="rounded-2xl border border-dashed border-line-strong bg-app px-6 py-12 text-center text-sm text-ink-soft">
                 Clinic photographs have not been published yet.
               </p>
             ) : (
@@ -516,7 +634,7 @@ export default function HomePage() {
         onNavigate={setPreviewIndex}
       />
 
-      {/* ------------------------------- 8. Contact & location preview */}
+      {/* ------------------------------- 9. Contact & location preview */}
       <Section tone="app" padding="lg" labelledBy="contact-preview-title">
         <Container>
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
@@ -631,7 +749,7 @@ export default function HomePage() {
         </Container>
       </Section>
 
-      {/* ------------------------------- 9. Footer lives in PublicLayout */}
+      {/* ------------------------------- 10. Footer lives in PublicLayout */}
     </>
   );
 }

@@ -3,11 +3,18 @@ import type { ReactNode } from 'react';
 import { Button } from '@/components/common/Button';
 import { cn } from '@/utils/cn';
 
+/**
+ * Spinner.
+ *
+ * Only for genuine "we do not know the shape" waits — auth checks and
+ * in-button submit feedback. Page content should use a skeleton from
+ * `./Skeletons` instead, so the layout does not jump when data arrives.
+ */
 export function Spinner({ className, label }: { className?: string; label?: string }) {
   return (
     <>
       <Loader2
-        className={cn('h-5 w-5 animate-spin text-blue-600', className)}
+        className={cn('h-5 w-5 animate-spin text-blue-600 motion-reduce:animate-none', className)}
         aria-hidden="true"
       />
       {label ? <span className="sr-only">{label}</span> : null}
@@ -21,64 +28,6 @@ export function InlineLoader({ label = 'Loading…' }: { label?: string }) {
       <Spinner />
       {label}
     </span>
-  );
-}
-
-export function LoadingState({
-  label = 'Loading…',
-  className,
-  variant = 'block',
-}: {
-  label?: string;
-  className?: string;
-  variant?: 'block' | 'cards';
-}) {
-  return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={cn(
-        'flex flex-col items-center justify-center gap-4 py-16 text-center',
-        className,
-      )}
-    >
-      <Spinner className="h-7 w-7" />
-      <p className="text-sm font-medium text-ink-soft">{label}</p>
-
-      {variant === 'cards' ? (
-        <div className="mt-2 grid w-full max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }, (_, index) => (
-            <div key={index} className="skeleton h-44 w-full" />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/** Card-shaped placeholder that mirrors the real layout to avoid shifting. */
-export function SkeletonCard() {
-  return (
-    <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
-      <div className="skeleton h-11 w-11 rounded-xl" />
-      <div className="skeleton mt-4 h-4 w-3/4" />
-      <div className="skeleton mt-3 h-3 w-full" />
-      <div className="skeleton mt-2 h-3 w-5/6" />
-    </div>
-  );
-}
-
-export function SkeletonGrid({ count = 6 }: { count?: number }) {
-  return (
-    <div
-      role="status"
-      aria-label="Loading content"
-      className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-    >
-      {Array.from({ length: count }, (_, index) => (
-        <SkeletonCard key={index} />
-      ))}
-    </div>
   );
 }
 

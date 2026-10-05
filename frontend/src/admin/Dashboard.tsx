@@ -10,7 +10,8 @@ import {
 import { Button, ButtonLink } from '@/components/common/Button';
 import { Badge, StatusBadge } from '@/components/common/Badge';
 import { Card } from '@/components/common/Card';
-import { EmptyState, ErrorState, SkeletonCard } from '@/components/feedback/States';
+import { EmptyState, ErrorState } from '@/components/feedback/States';
+import { SkeletonListRows, SkeletonStatCard } from '@/components/feedback/Skeletons';
 import { useAsync } from '@/hooks/useAsync';
 import { adminApi } from '@/services/adminApi';
 import { useAuth } from '@/context/AuthContext';
@@ -107,9 +108,14 @@ export default function AdminDashboardPage() {
       ) : null}
 
       {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        role="status"
+        aria-busy={dashboard.isLoading || undefined}
+        aria-label="Summary counts"
+      >
         {dashboard.isLoading && !dashboard.data
-          ? Array.from({ length: 4 }, (_, index) => <SkeletonCard key={index} />)
+          ? Array.from({ length: 4 }, (_, index) => <SkeletonStatCard key={index} />)
           : cards.map((card) => (
               <Link key={card.label} to={card.to} className="group block h-full">
                 <Card
@@ -134,7 +140,7 @@ export default function AdminDashboardPage() {
                   <p className="mt-1 text-xs text-ink-soft">{card.hint}</p>
                 </Card>
               </Link>
-            ))}
+          ))}
       </div>
 
       {/* Quick links */}
@@ -210,11 +216,7 @@ export default function AdminDashboardPage() {
               ))}
             </ul>
           ) : (
-            <div className="space-y-3 p-5">
-              {Array.from({ length: 3 }, (_, index) => (
-                <div key={index} className="skeleton h-14 w-full" />
-              ))}
-            </div>
+            <SkeletonListRows count={3} />
           )}
         </Card>
 
@@ -258,11 +260,7 @@ export default function AdminDashboardPage() {
               ))}
             </ul>
           ) : (
-            <div className="space-y-3 p-5">
-              {Array.from({ length: 3 }, (_, index) => (
-                <div key={index} className="skeleton h-14 w-full" />
-              ))}
-            </div>
+            <SkeletonListRows count={3} />
           )}
         </Card>
       </div>

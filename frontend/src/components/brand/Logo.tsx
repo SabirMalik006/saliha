@@ -78,7 +78,7 @@ export function Logo({
       <span className="flex min-w-0 flex-col leading-tight">
         <span
           className={cn(
-            'font-bold tracking-[-0.01em]',
+            'font-display font-bold tracking-[-0.005em]',
             variant === 'stacked' ? 'text-xl' : 'text-[1.0625rem] sm:text-lg',
             isDark ? 'text-white' : 'text-navy-800',
           )}
@@ -88,8 +88,8 @@ export function Logo({
         {!compact ? (
           <span
             className={cn(
-              'truncate text-xs sm:text-[0.8125rem]',
-              isDark ? 'text-blue-200' : 'text-ink-soft',
+              'mt-[3px] truncate text-[9.5px] font-semibold uppercase tracking-[0.18em] sm:text-[10px]',
+              isDark ? 'text-pink-200/90' : 'text-pink-600/90',
             )}
           >
             {doctorName}

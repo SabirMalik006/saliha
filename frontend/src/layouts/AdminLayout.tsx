@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   CalendarClock,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
 import { InitialAvatar } from '@/components/common/SmartImage';
+import { SkeletonAdminList, SkeletonRegion } from '@/components/feedback/Skeletons';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useToast } from '@/context/ToastContext';
@@ -263,7 +264,23 @@ export function AdminLayout() {
         </header>
 
         <main id="admin-content" className="container-admin py-6 sm:py-8">
-          <Outlet />
+          <Suspense
+            fallback={
+              <SkeletonRegion label={`Loading ${pageTitle}`} className="space-y-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-2">
+                    <div className="skeleton h-6 w-56" />
+                    <div className="skeleton h-3.5 w-72" />
+                  </div>
+                  <div className="skeleton h-9 w-28 rounded-xl" />
+                </div>
+                <div className="skeleton h-12 w-full rounded-xl" />
+                <SkeletonAdminList count={4} />
+              </SkeletonRegion>
+            }
+          >
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

@@ -15,7 +15,8 @@ import { ServiceIcon } from '@/components/services/ServiceIcon';
 import { ServiceCard } from '@/components/services/ServiceCard';
 import { SmartImage } from '@/components/common/SmartImage';
 import { ConsultationBanner } from '@/components/contact/ConsultationBanner';
-import { EmptyState, ErrorState, LoadingState } from '@/components/feedback/States';
+import { EmptyState, ErrorState } from '@/components/feedback/States';
+import { SkeletonRegion, SkeletonServiceDetail } from '@/components/feedback/Skeletons';
 import { Seo } from '@/components/seo/Seo';
 import { useSettings } from '@/context/SettingsContext';
 import { usePublishedServices, useServiceBySlug } from '@/hooks/useServices';
@@ -33,8 +34,10 @@ export default function ServiceDetailPage() {
 
   if (service.isLoading) {
     return (
-      <Container className="py-20">
-        <LoadingState label="Loading service details…" />
+      <Container>
+        <SkeletonRegion label="Loading service details">
+          <SkeletonServiceDetail />
+        </SkeletonRegion>
       </Container>
     );
   }

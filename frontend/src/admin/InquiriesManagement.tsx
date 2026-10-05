@@ -7,6 +7,12 @@ import { Modal } from '@/components/common/Modal';
 import { Pagination } from '@/components/common/Pagination';
 import { SelectInput, TextArea } from '@/components/forms/Inputs';
 import { EmptyState, ErrorState } from '@/components/feedback/States';
+import {
+  SkeletonModal,
+  SkeletonMobileList,
+  SkeletonRegion,
+  SkeletonTableRows,
+} from '@/components/feedback/Skeletons';
 import { useAdminList, type AdminListResult } from '@/hooks/useAdminList';
 import { useAsync } from '@/hooks/useAsync';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -140,6 +146,36 @@ export default function InquiriesManagementPage() {
               : 'Messages sent from the website contact form will appear here.'
           }
         />
+      ) : list.isLoading && list.items.length === 0 ? (
+        <SkeletonRegion
+          label="Loading inquiries"
+          className="overflow-hidden rounded-2xl border border-line bg-white"
+        >
+          <div className="hidden lg:block">
+            <table className="w-full">
+              <caption className="sr-only">Loading contact inquiries</caption>
+              <thead className="border-b border-line bg-app">
+                <tr>
+                  {['From', 'Subject', 'Message', 'Received', 'Status'].map((heading) => (
+                    <th
+                      key={heading}
+                      scope="col"
+                      className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-ink-faint"
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                <SkeletonTableRows count={6} columns={5} />
+              </tbody>
+            </table>
+          </div>
+          <div className="lg:hidden">
+            <SkeletonMobileList count={4} />
+          </div>
+        </SkeletonRegion>
       ) : (
         <>
           <div className="overflow-hidden rounded-2xl border border-line bg-white">
@@ -273,10 +309,9 @@ export default function InquiriesManagementPage() {
         }
       >
         {detail.isLoading ? (
-          <div className="space-y-3">
-            <div className="skeleton h-4 w-1/2" />
-            <div className="skeleton h-20 w-full" />
-          </div>
+          <SkeletonRegion label="Loading inquiry details">
+            <SkeletonModal />
+          </SkeletonRegion>
         ) : detail.error ? (
           <ErrorState
             title="We could not load this inquiry"

@@ -4,7 +4,8 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Container, Section } from '@/components/common/Layout';
 import { ConsultationBanner } from '@/components/contact/ConsultationBanner';
 import { GalleryGrid, GalleryLightbox, CATEGORY_LABELS } from '@/components/gallery/GalleryGrid';
-import { EmptyState, ErrorState, LoadingState } from '@/components/feedback/States';
+import { EmptyState, ErrorState } from '@/components/feedback/States';
+import { SkeletonGalleryGrid, SkeletonRegion } from '@/components/feedback/Skeletons';
 import { Seo } from '@/components/seo/Seo';
 import { useGallery } from '@/hooks/useGallery';
 import { routes } from '@/routes/paths';
@@ -69,7 +70,9 @@ export default function GalleryPage() {
       <Section tone="white" padding="lg">
         <Container>
           {gallery.isLoading ? (
-            <LoadingState label="Loading gallery…" variant="cards" />
+            <SkeletonRegion label="Loading gallery images">
+              <SkeletonGalleryGrid count={6} />
+            </SkeletonRegion>
           ) : gallery.error ? (
             <ErrorState
               title="We could not load the gallery"
