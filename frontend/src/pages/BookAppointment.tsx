@@ -33,6 +33,7 @@ import {
   WHATSAPP_APPOINTMENT_MESSAGE,
 } from '@/constants/clinic';
 import { useSettings } from '@/context/SettingsContext';
+import { useToast } from '@/context/ToastContext';
 import { usePublishedServices } from '@/hooks/useServices';
 import { routes } from '@/routes/paths';
 import { buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
@@ -47,6 +48,7 @@ const SERVER_ERROR_MESSAGE =
 export default function BookAppointmentPage() {
   const { settings } = useSettings();
   const { services } = usePublishedServices();
+  const { success: successToast } = useToast();
   const [serverError, setServerError] = useState<ApiError | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const successRef = useRef<HTMLDivElement>(null);
@@ -87,7 +89,13 @@ export default function BookAppointmentPage() {
   }, [today]);
 
   useEffect(() => {
-    if (isSubmitted) successRef.current?.focus();
+    if (!isSubmitted) return;
+    const panel = successRef.current;
+    panel?.focus();
+    // The form collapses when it is replaced, so the browser would otherwise
+    // leave the visitor looking at whatever was below it. Bring the
+    // confirmation into view explicitly so it cannot be missed.
+    panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [isSubmitted]);
 
   const submitLock = useRef(false);
@@ -121,6 +129,10 @@ export default function BookAppointmentPage() {
 
       setIsSubmitted(true);
       reset();
+      successToast(
+        'Thank you — your appointment request was sent',
+        'The clinic team will confirm your date and time by phone or WhatsApp.',
+      );
     } catch (error) {
       const apiError = normaliseApiError(error);
       setServerError(apiError);
@@ -198,7 +210,7 @@ export default function BookAppointmentPage() {
                 {isSubmitted ? (
                   <SuccessPanel
                     panelRef={successRef}
-                    title="Request received"
+                    title="Thank you! Your appointment request has been received"
                     message={SUCCESS_MESSAGE}
                     className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6 text-center outline-none"
                     actions={

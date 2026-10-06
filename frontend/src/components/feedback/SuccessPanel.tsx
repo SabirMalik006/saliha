@@ -73,7 +73,7 @@ export function SuccessPanel({
 
       <motion.h3
         {...fadeUp(0.18)}
-        className="mt-4 text-lg font-semibold text-navy-800"
+        className="mt-4 text-xl font-semibold leading-snug text-navy-800 sm:text-2xl"
       >
         {title}
       </motion.h3>

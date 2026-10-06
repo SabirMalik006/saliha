@@ -26,17 +26,19 @@ import { normaliseApiError, type ApiError } from '@/services/apiClient';
 import { contactSchema, type ContactFormValues } from '@/schemas';
 import { CONTACT_SUBJECT_OPTIONS, CONTACT_FORM_MAX_MESSAGE } from '@/constants/clinic';
 import { useSettings } from '@/context/SettingsContext';
+import { useToast } from '@/context/ToastContext';
 import { routes } from '@/routes/paths';
 import { buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
 import { WHATSAPP_APPOINTMENT_MESSAGE } from '@/constants/clinic';
 
 const SUCCESS_MESSAGE =
-  'Thank you. Your message has been received. The clinic team will contact you if a response is required.';
+  'Your message has reached the clinic team. We will review it and contact you if a response is required.';
 const SERVER_ERROR_MESSAGE =
   'We could not submit the form right now. Please try again or contact the clinic by phone/WhatsApp.';
 
 export default function ContactPage() {
   const { settings } = useSettings();
+  const { success: successToast } = useToast();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<ApiError | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -74,7 +76,13 @@ export default function ContactPage() {
   );
 
   useEffect(() => {
-    if (isSubmitted) successRef.current?.focus();
+    if (!isSubmitted) return;
+    const panel = successRef.current;
+    panel?.focus();
+    // The form collapses when it is replaced, so the browser would otherwise
+    // leave the visitor looking at whatever was below it. Bring the
+    // confirmation into view explicitly so it cannot be missed.
+    panel?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [isSubmitted]);
 
   const onSubmit = handleSubmit(async (values) => {
@@ -95,6 +103,10 @@ export default function ContactPage() {
 
       setIsSubmitted(true);
       reset();
+      successToast(
+        'Thank you — your message has been sent',
+        'The clinic team has received your inquiry and will be in touch during clinic hours.',
+      );
     } catch (error) {
       const apiError = normaliseApiError(error);
       setServerError(apiError);
@@ -260,7 +272,7 @@ export default function ContactPage() {
                 {isSubmitted ? (
                   <SuccessPanel
                     panelRef={successRef}
-                    title="Message received"
+                    title="Thank you! Your message has been received"
                     message={SUCCESS_MESSAGE}
                     actions={
                       <div className="flex flex-col justify-center gap-3 sm:flex-row">
