@@ -168,10 +168,6 @@ export function Footer() {
                 Privacy Policy
               </Link>
             </li>
-            <li className="inline-flex items-center gap-2 text-blue-400">
-              <span className="h-1 w-1 rounded-full bg-current" aria-hidden="true" />
-              Information on this website is general and not a substitute for medical advice.
-            </li>
           </ul>
         </div>
       </div>
