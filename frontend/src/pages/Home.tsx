@@ -150,7 +150,8 @@ export default function HomePage() {
 
         <Container className="relative pb-12 pt-6 sm:pb-14 sm:pt-8 lg:pb-14 lg:pt-9">
           <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-14">
-            <div className="lg:col-span-6">
+            {/* Nudged down so the copy sits optically centred against the portrait. */}
+            <div className="mt-2 lg:col-span-6 lg:mt-8">
               <p
                 className="inline-flex animate-fade-up flex-wrap items-center gap-2 rounded-full border border-pink-200 bg-pink-50 px-3.5 py-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-pink-700 sm:text-xs"
                 style={{ animationDelay: '0ms' }}
