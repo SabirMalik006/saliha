@@ -144,7 +144,7 @@ export default function HomePage() {
         className="relative overflow-hidden bg-gradient-to-b from-blue-50 via-white to-white"
       >
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-24 -top-28 h-[22rem] w-[22rem] rounded-full bg-pink-100/60 blur-2xl" />
+          <div className="absolute -bottom-28 -right-24 h-[22rem] w-[22rem] rounded-full bg-pink-100/60 blur-2xl" />
           <div className="absolute -left-32 top-40 h-[20rem] w-[20rem] rounded-full bg-blue-100/70 blur-2xl" />
         </div>
 

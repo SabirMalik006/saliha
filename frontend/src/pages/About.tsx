@@ -109,7 +109,7 @@ export default function AboutPage() {
       {/* Profile hero */}
       <section className="relative overflow-hidden border-b border-line bg-gradient-to-b from-blue-50 to-white">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-24 top-0 h-80 w-80 rounded-full bg-pink-100/50 blur-2xl" />
+          <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-pink-100/50 blur-2xl" />
         </div>
 
         <Container className="relative py-10 sm:py-12">
