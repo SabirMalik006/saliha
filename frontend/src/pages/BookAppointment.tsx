@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -40,7 +40,7 @@ import { buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
 import { todayLocalISO } from '@/utils/format';
 
 const SUCCESS_MESSAGE =
-  'Your appointment request has been received. The clinic team will contact you to confirm the date and time.';
+  'Your appointment request has been received. We will contact you soon to confirm your date and time.';
 // Mandated wording, section 19 of the requirements document.
 const SERVER_ERROR_MESSAGE =
   'We could not submit the form right now. Please try again or contact the clinic by phone/WhatsApp.';
@@ -60,6 +60,7 @@ export default function BookAppointmentPage() {
     watch,
     reset,
     setError,
+    getValues,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<AppointmentFormValues>({
@@ -131,7 +132,7 @@ export default function BookAppointmentPage() {
       reset();
       successToast(
         'Thank you — your appointment request was sent',
-        'The clinic team will confirm your date and time by phone or WhatsApp.',
+        'We will contact you soon to confirm your date and time.',
       );
     } catch (error) {
       const apiError = normaliseApiError(error);
@@ -149,6 +150,16 @@ export default function BookAppointmentPage() {
       submitLock.current = false;
     }
   });
+
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    // The honeypot is off-screen and cannot be focused, but browsers and
+    // password managers still autofill it. A value there would fail validation
+    // invisibly and the visitor would never see why nothing happened, so drop
+    // it before validating. Scripted spam hitting the API directly is still
+    // rejected by the server-side check and by the rate limiter.
+    if (getValues('company')) setValue('company', '');
+    onSubmit(event);
+  };
 
   return (
     <>
@@ -257,7 +268,7 @@ export default function BookAppointmentPage() {
                     }
                   />
                 ) : (
-                  <form onSubmit={onSubmit} noValidate className="mt-6 space-y-5">
+                  <form onSubmit={handleFormSubmit} noValidate className="mt-6 space-y-5">
                     <div className="relative">
                       <HoneypotField register={register} />
                     </div>

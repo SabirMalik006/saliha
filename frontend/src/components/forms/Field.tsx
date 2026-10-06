@@ -96,12 +96,15 @@ export function Field({
 }
 
 /**
- * Honeypot field: visually and programmatically hidden from users, but
- * reachable by naive bots. Never validated with "required".
- */
-/**
  * Hidden field that only automated spam bots fill in. Typed loosely so any
  * React Hook Form field map can be passed in without casting at the call site.
+ *
+ * `autoComplete="off"` is ignored by Chrome and by most password managers, so
+ * a hidden field labelled "Company" gets autofilled from the visitor's profile
+ * — which then fails validation on an input nobody can see or tab to, silently
+ * blocking the whole form. `new-password` plus a neutral label stops that;
+ * the contact and appointment pages also clear the value before validating as
+ * a safety net.
  */
 export function HoneypotField({
   register,
@@ -112,12 +115,15 @@ export function HoneypotField({
 }) {
   return (
     <div aria-hidden="true" className="absolute left-[-9999px] top-0 h-0 w-0 overflow-hidden">
-      <label htmlFor={`${name}-trap`}>Company</label>
+      <label htmlFor={`${name}-trap`}>Leave this field empty</label>
       <input
         id={`${name}-trap`}
         type="text"
         tabIndex={-1}
-        autoComplete="off"
+        autoComplete="new-password"
+        data-1p-ignore=""
+        data-lpignore="true"
+        data-bwignore="true"
         {...(register(name as never) as React.InputHTMLAttributes<HTMLInputElement>)}
       />
     </div>

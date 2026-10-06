@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +32,7 @@ import { buildPhoneHref, buildWhatsAppHref } from '@/utils/contact';
 import { WHATSAPP_APPOINTMENT_MESSAGE } from '@/constants/clinic';
 
 const SUCCESS_MESSAGE =
-  'Your message has reached the clinic team. We will review it and contact you if a response is required.';
+  'Your message has reached the clinic team. We will contact you soon — during clinic hours we normally reply the same day.';
 const SERVER_ERROR_MESSAGE =
   'We could not submit the form right now. Please try again or contact the clinic by phone/WhatsApp.';
 
@@ -50,6 +50,8 @@ export default function ContactPage() {
     reset,
     watch,
     setError,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
@@ -105,7 +107,7 @@ export default function ContactPage() {
       reset();
       successToast(
         'Thank you — your message has been sent',
-        'The clinic team has received your inquiry and will be in touch during clinic hours.',
+        'We will contact you soon during clinic hours.',
       );
     } catch (error) {
       const apiError = normaliseApiError(error);
@@ -124,6 +126,16 @@ export default function ContactPage() {
       submitLock.current = false;
     }
   });
+
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    // The honeypot is off-screen and cannot be focused, but browsers and
+    // password managers still autofill it. A value there would fail validation
+    // invisibly and the visitor would never see why nothing happened, so drop
+    // it before validating. Scripted spam hitting the API directly is still
+    // rejected by the server-side check and by the rate limiter.
+    if (getValues('company')) setValue('company', '');
+    onSubmit(event);
+  };
 
   return (
     <>
@@ -293,7 +305,7 @@ export default function ContactPage() {
                     }
                   />
                 ) : (
-                  <form onSubmit={onSubmit} noValidate className="mt-6 space-y-5">
+                  <form onSubmit={handleFormSubmit} noValidate className="mt-6 space-y-5">
                     <div className="relative">
                       <HoneypotField register={register} />
                     </div>
