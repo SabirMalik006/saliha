@@ -35,3 +35,4 @@ coverage/
 
 # Stray Vite build artifacts
 *.timestamp-*.mjs
+.vercel
