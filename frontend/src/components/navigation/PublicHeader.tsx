@@ -54,13 +54,14 @@ export function PublicHeader() {
     <>
       {/* The header itself stays transparent once scrolled, so no full-width
           bar ever appears — only the rounded pill carries the background. At
-          the top of a page the header picks up the first slice of the hero's
-          own blue gradient, so the pill blends into it. Both gradients end in
-          `transparent`, which keeps the join invisible. */}
+          the top of a page it is a solid `blue-50`, the exact colour every
+          page hero starts on, so the gradient runs unbroken from behind the
+          navbar down through the hero instead of fading to white and jumping
+          back to blue at the seam. */}
       <header
         className={cn(
           'sticky top-0 z-50 transition-[background-color] duration-300',
-          isScrolled ? 'bg-transparent' : 'bg-gradient-to-b from-blue-50 from-[70%] to-transparent',
+          isScrolled ? 'bg-transparent' : 'bg-blue-50',
         )}
       >
         {/* Scroll progress — sits above the pill, like a hairline of light. */}
